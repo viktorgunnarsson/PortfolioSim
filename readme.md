@@ -37,7 +37,7 @@ python portfolio_gui_qt.py
 - **Loan Value**: Initial loan amount (SEK)
 - **Loan Rate (%)**: Annual loan interest rate
 - **ISK Rate (%)**: Annual ISK tax rate
-- **Monthly Cost**: Monthly expenses (SEK)
+- **Monthly Expenses**: Monthly expenses (SEK)
 - **Monthly Salary**: Monthly income (SEK)
 - **House Cash Investment**: Amount spent on house purchase (SEK)
 - **Start Year**: Year to start the simulation

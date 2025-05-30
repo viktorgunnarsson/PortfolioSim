@@ -66,11 +66,11 @@ class PortfolioSimulatorGUI(QWidget):
         self.isk_rate.setSingleStep(0.1)
         self.isk_rate.setValue(1)
 
-        self.monthly_cost = QDoubleSpinBox()
-        self.monthly_cost.setMaximum(1e6)
-        self.monthly_cost.setSingleStep(1000)
-        self.monthly_cost.setValue(22000)
-        self.monthly_cost.setDecimals(0)
+        self.monthly_expenses = QDoubleSpinBox()
+        self.monthly_expenses.setMaximum(1e6)
+        self.monthly_expenses.setSingleStep(1000)
+        self.monthly_expenses.setValue(22000)
+        self.monthly_expenses.setDecimals(0)
 
         self.monthly_salary = QDoubleSpinBox()
         self.monthly_salary.setMaximum(1e6)
@@ -116,8 +116,8 @@ class PortfolioSimulatorGUI(QWidget):
         form_layout.addRow("Loan Value", self.loan_value)
         form_layout.addRow("Loan Rate (%)", self.loan_rate)
         form_layout.addRow("ISK Rate (%)", self.isk_rate)
-        form_layout.addRow("Monthly Cost", self.monthly_cost)
-        form_layout.addRow("Monthly Salary", self.monthly_salary)
+        form_layout.addRow("Monthly Expenses", self.monthly_expenses)
+        form_layout.addRow("Monthly Income", self.monthly_salary)
         form_layout.addRow("House Cash Investment", self.house_cost)
         form_layout.addRow("Start Year", self.start_year)
         form_layout.addRow("Sim. Number of Years", self.number_years)
@@ -167,7 +167,7 @@ class PortfolioSimulatorGUI(QWidget):
             loan_value = 0
         loan_rate = self.loan_rate.value() / 100
         isk_rate = self.isk_rate.value() / 100
-        monthly_cost = self.monthly_cost.value()
+        monthly_cost = self.monthly_expenses.value()
         monthly_salary = self.monthly_salary.value()
         if self.random_start_year.isChecked():
             start_year = np.random.randint(1985, 2016)
