@@ -1,6 +1,6 @@
 # Portfolio Simulator GUI
 
-A simple graphical tool for simulating and visualizing a long-term investment portfolio. 
+A simple graphical tool for simulating and visualizing a long-term investment portfolio consisting of a single asset. 
 This is a quick hack I wrote while trying out Github Copilot. Not being an economist, please excuse the misuse of any terms.
 It downloads historical fund (Avanza) and Swedish inflation (SCB) data, and performs a backtracking simulation based on a scenario that you specify.
 The scenario can include leverage, a house purchase, and the effect of inflation. 
