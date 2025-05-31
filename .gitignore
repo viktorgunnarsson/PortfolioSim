@@ -1,3 +1,4 @@
 testPFsimulator.py
 *.pkl
-*.txt
+2do.txt
+/__pycache__/*
