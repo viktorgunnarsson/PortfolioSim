@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Portfolio Simulator</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      gap: 40px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    form {
+      flex: 1;
+      max-width: 400px;
+    }
+
+    #plot-container {
+      flex: 2;
+      min-width: 300px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input, button {
+      margin-top: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .group {
+      margin-bottom: 20px;
+    }
+
+    #metrics {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+
+    .inv-entry {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .inv-entry input {
+      flex: 1;
+    }
+
+    /* Responsive layout for smaller screens */
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+
+      #plot-container {
+        min-width: unset;
+        width: 100%;
+      }
+
+      form {
+        max-width: unset;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Portfolio Simulator</h1>
+
+  <div class="container">
+    <form id="simForm">
+      <div class="group">
+        <label>Start Value:
+          <input type="number" name="start_value" value="1500000" required>
+        </label>
+
+        <label>Loan Value:
+          <input type="number" name="loan_value" value="500000" required>
+        </label>
+
+        <label>Loan Rate:
+          <input type="number" step="0.001" name="loan_rate" value="0.02" required>
+        </label>
+
+        <label>ISK Rate:
+          <input type="number" step="0.001" name="isk_rate" value="0.01" required>
+        </label>
+
+        <label>Monthly Withdrawal:
+          <input type="number" name="monthly_withdrawal" value="0">
+        </label>
+
+        <label>Simulate Inflation:
+          <input type="checkbox" name="simulate_inflation" checked>
+        </label>
+
+        <label>Start Date:
+          <input type="date" name="start_date" value="2000-01-01">
+        </label>
+
+        <label>End Date:
+          <input type="date" name="end_date">
+        </label>
+      </div>
+
+      <div class="group">
+        <h3>Investments</h3>
+        <div id="investmentContainer"></div>
+        <button type="button" onclick="addInvestment('investmentContainer')">Add Investment</button>
+      </div>
+
+      <div class="group">
+        <h3>House Investments</h3>
+        <div id="houseInvestmentContainer"></div>
+        <button type="button" onclick="addInvestment('houseInvestmentContainer')">Add House Investment</button>
+      </div>
+
+      <button type="submit">Run Simulation</button>
+    </form>
+
+    <div id="plot-container">
+      <div id="plot" style="height: 500px;"></div>
+      <pre id="metrics"></pre>
+    </div>
+  </div>
+
+  <script>
+    function addInvestment(containerId) {
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.className = "inv-entry";
+      div.innerHTML = `
+        <input type="date" class="inv-date">
+        <input type="number" class="inv-amount" placeholder="Amount">
+        <button type="button" onclick="this.parentElement.remove()">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    document.getElementById('simForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      data.start_value = parseFloat(data.start_value);
+      data.loan_value = parseFloat(data.loan_value);
+      data.loan_rate = parseFloat(data.loan_rate);
+      data.isk_rate = parseFloat(data.isk_rate);
+      data.monthly_withdrawal = parseFloat(data.monthly_withdrawal);
+      data.simulate_inflation = formData.get("simulate_inflation") === "on";
+      data.start_date = data.start_date || null;
+      data.end_date = data.end_date || null;
+
+      data.investments = {};
+      document.querySelectorAll('#investmentContainer > div').forEach(div => {
+        const date = div.querySelector('.inv-date').value;
+        const amount = div.querySelector('.inv-amount').value;
+        if (date && amount) data.investments[date] = parseFloat(amount);
+      });
+
+      data.house_investments = {};
+      document.querySelectorAll('#houseInvestmentContainer > div').forEach(div => {
+        const date = div.querySelector('.inv-date').value;
+        const amount = div.querySelector('.inv-amount').value;
+        if (date && amount) data.house_investments[date] = parseFloat(amount);
+      });
+
+      try {
+        const res = await fetch('/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.error) {
+          alert("Simulation failed: " + result.error);
+          return;
+        }
+
+        Plotly.newPlot('plot', [
+          { x: result.dates, y: result.portfolio_value, name: 'Portfolio', type: 'scatter' },
+          { x: result.dates, y: result.debt_value, name: 'Debt', type: 'scatter' },
+          { x: result.dates, y: result.equity_value, name: 'Equity', type: 'scatter' }
+        ], {
+          title: 'Simulation Results',
+          xaxis: { title: 'Date' },
+          yaxis: { title: 'Value (SEK)' }
+        });
+
+        document.getElementById('metrics').textContent =
+          "Performance Metrics:\n" + JSON.stringify(result.metrics, null, 2);
+
+      } catch (err) {
+        alert("Request failed: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
