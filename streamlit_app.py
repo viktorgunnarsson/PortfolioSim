@@ -87,7 +87,7 @@ if st.sidebar.button("Run Simulation"):
 
         # Plotting
         #st.subheader("📊 Portfolio Performance")
-        
+
         # Convert to millions for better readability
         portfolio *= 1e-6
         debt *= 1e-6
@@ -106,8 +106,8 @@ if st.sidebar.button("Run Simulation"):
         st.pyplot(fig)
 
         # Metrics
-        metrics = sim.calculate_performance_metrics(portfolio)
-        st.subheader("📈 Performance Metrics")
+        metrics = sim.calculate_performance_metrics(equity)
+        st.subheader("📈 Performance Metrics (equity)")
         st.write({
             "CAGR": f"{metrics['CAGR']:.2%}",
             "Max Drawdown": f"{metrics['Max Drawdown']:.2%}",
